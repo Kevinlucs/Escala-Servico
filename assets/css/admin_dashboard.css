@@ -1,0 +1,80 @@
+/* Resetando margens e bordas padrões */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Corpo da página */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    text-align: center;
+    padding: 20px;
+}
+
+/* Cabeçalho */
+h1 {
+    color: #004d00; /* Verde */
+    background-color: #009900; /* Verde mais escuro */
+    padding: 10px;
+    margin-bottom: 20px;
+}
+
+/* Estilo da Tabela */
+table {
+    width: 90%;
+    margin: 0 auto;
+    border-collapse: collapse;
+}
+
+/* Estilo das células da tabela */
+th,
+td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: center;
+    font-size: 16px;
+}
+
+/* Cabeçalhos das colunas */
+th {
+    background-color: #ffcc00; /* Amarelo */
+    color: white;
+    font-weight: bold;
+}
+
+/* Estilo das células de dados */
+td {
+    background-color: #fff;
+}
+
+/* Cores para cada tipo de folga */
+td:nth-child(4),
+td:nth-child(5) {
+    font-weight: bold;
+}
+
+/* Estilos das colunas de folgas */
+td:nth-child(4):not(:empty) {
+    background-color: #c2f0c2; /* Verde claro para folga preta */
+}
+
+td:nth-child(5):not(:empty) {
+    background-color: #f2b3b3; /* Vermelho claro para folga vermelha */
+}
+
+/* Estilo para os links */
+a {
+    text-decoration: none;
+    color: #800000; /* Cor de link vermelha */
+    font-weight: bold;
+    font-size: 16px;
+    margin-top: 20px;
+    display: block;
+}
+
+/* Estilo do botão de voltar ao painel */
+a:hover {
+    color: #ff0000;
+}
