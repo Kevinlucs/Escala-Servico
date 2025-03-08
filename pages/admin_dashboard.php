@@ -18,7 +18,7 @@ function calcularFolgas($data_servico, $tipo_escala)
         $hoje = strtotime($hoje);
 
         // Calculando a folga (tanto para preta quanto vermelha)
-        $dias_folga = round(($hoje - $data_servico) / 86400); // 86400 segundos = 1 dia
+        $dias_folga = round(($hoje - $data_servico) / 86400);
 
         return $dias_folga;
     }

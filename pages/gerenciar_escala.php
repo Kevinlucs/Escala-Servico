@@ -10,7 +10,7 @@ if (!isset($_SESSION['militar_id']) || $_SESSION['tipo'] != 'admin') {
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $data_servico = $_POST['data_servico'];
     $tipo_escala = $_POST['tipo_escala'];
-    $id_responsavel = $_POST['id_responsavel'];  // Responsável será o logado
+    $id_responsavel = $_POST['id_responsavel'];
 
     // Insere a escala
     $stmt = $conn->prepare("INSERT INTO escalas (data_servico, tipo_escala, id_responsavel) VALUES (?, ?, ?)");
@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // Insere os serviços
     foreach ($_POST['servicos'] as $servico) {
-        $tipo_servico = $servico['tipo_servico'];
+        $tipo_servico = isset($servico['tipo_servico']) && !empty($servico['tipo_servico']) ? $servico['tipo_servico'] : 'Permanência';
         $id_militar = $servico['id_militar'];
 
         $stmt = $conn->prepare("INSERT INTO servicos (id_escala, tipo_servico, id_militar) VALUES (?, ?, ?)");
@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 
 
-// Busca os militares
+// Busca os militares no banco
 $militares = $conn->query("SELECT id, nome FROM militares");
 ?>
 
@@ -78,7 +78,6 @@ $militares = $conn->query("SELECT id, nome FROM militares");
                     <?php
                     // Excluindo o responsável da lista de militares
                     while ($militar = $militares->fetch_assoc()) {
-                        // Verifica se o militar é o responsável logado e não o exibe na lista
                         if ($militar['id'] != $_SESSION['militar_id']) {
                             echo "<option value='" . $militar['id'] . "'>" . $militar['nome'] . "</option>";
                         }
@@ -111,7 +110,7 @@ $militares = $conn->query("SELECT id, nome FROM militares");
                 <label>Militar:</label>
                 <select name="servicos[${contadorServicos}][id_militar]" required>
                     <?php
-                    $militares->data_seek(0); // Reinicia o ponteiro do resultado
+                    $militares->data_seek(0);
                     while ($militar = $militares->fetch_assoc()) { ?>
                         <option value="<?php echo $militar['id']; ?>"><?php echo $militar['nome']; ?></option>
                     <?php } ?>
