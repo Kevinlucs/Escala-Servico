@@ -1,9 +1,6 @@
 <?php
-session_start();
-if (!isset($_SESSION['militar_id'])) {
-    header("Location: index.php");
-    exit();
-}
+// Incluir o arquivo de verificação de sessão
+require_once('../backend/session.php');
 ?>
 
 <!DOCTYPE html>
@@ -35,6 +32,7 @@ if (!isset($_SESSION['militar_id'])) {
                 <?php } else { ?>
                     <a href="folgas.php">Folgas</a>
                 <?php } ?>
+            </li>
         </ul>
     </nav>
     <p><a href="logout.php">Sair</a></p>

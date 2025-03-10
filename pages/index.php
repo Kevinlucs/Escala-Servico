@@ -1,6 +1,15 @@
 <?php
-session_start();  // Deve ser a primeira linha
+// Incluir o arquivo de verificação de sessão
+require_once('../backend/session.php'); // Caminho ajustado para o arquivo session.php
+
 require_once('../includes/conexao.php');
+
+// Verifica se o usuário já está logado
+if (isset($_SESSION['militar_id'])) {
+    // Se estiver logado, redireciona diretamente para o dashboard
+    header("Location: dashboard.php");
+    exit();
+}
 
 // Verifica se o formulário foi enviado
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -21,12 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['identidade_militar'] = $usuario['identidade_militar'];
         $_SESSION['tipo'] = $usuario['tipo']; // Define se é admin ou comum
 
-        // Para debugar
-        echo "<pre>";
-        print_r($_SESSION); // Verifique os dados da sessão
-        echo "</pre>";
-
-        // Redireciona todos para dashboard.php
+        // Redireciona para o dashboard
         header("Location: dashboard.php");
         exit(); // Certifique-se de que o redirecionamento ocorra corretamente
     } else {

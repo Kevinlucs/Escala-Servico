@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once('../includes/conexao.php');
+require_once('../backend/session.php');
 
 // Se o usuário não for administrador, redireciona
 if (!isset($_SESSION['militar_id']) || $_SESSION['tipo'] != 'admin') {

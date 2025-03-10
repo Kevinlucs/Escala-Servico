@@ -1,19 +1,19 @@
 <?php
-session_start();
+// Incluir o arquivo de verificação de sessão
+require_once('../backend/session.php'); // Caminho ajustado para o arquivo session.php
+
 require_once('../includes/conexao.php');
 
-if (!isset($_SESSION['id'])) {
-    header("Location: index.php");
-    exit();
-}
-
+// Verifica se o formulário foi enviado
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Cria o hash da nova senha
     $nova_senha = password_hash($_POST['nova_senha'], PASSWORD_DEFAULT);
     $id = $_SESSION['id'];
 
+    // Atualiza a senha no banco de dados
     $sql = "UPDATE usuarios SET senha='$nova_senha', primeiro_acesso=0 WHERE id=$id";
     if ($conn->query($sql) === TRUE) {
-        header("Location: dashboard.php");
+        header("Location: dashboard.php"); // Redireciona para o painel após sucesso
         exit();
     } else {
         echo "Erro ao atualizar senha!";

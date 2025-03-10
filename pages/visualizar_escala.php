@@ -1,12 +1,8 @@
 <?php
+// Incluir o arquivo de verificação de sessão
+require_once('../backend/session.php'); // Caminho ajustado para o arquivo session.php
+
 require_once('../includes/conexao.php');
-
-session_start();
-if (!isset($_SESSION['militar_id'])) {
-    header("Location: index.php");
-    exit();
-}
-
 
 // Configura o locale para português
 setlocale(LC_TIME, 'pt_BR.utf8', 'pt_BR', 'Portuguese_Brazil');
@@ -16,13 +12,6 @@ function removerAcentos($texto)
 {
     return iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $texto);
 }
-
-
-if (!isset($_SESSION['militar_id'])) {
-    header("Location: index.php");
-    exit();
-}
-
 
 // Busca as escalas
 $escalas = $conn->query("
@@ -156,8 +145,6 @@ while ($escala = $escalas->fetch_assoc()) {
 
             echo 'DIA ' . $data_formatada . ' (' . $dia_semana_traduzido . ')';
             ?>
-
-
         </h3>
 
         <table>
