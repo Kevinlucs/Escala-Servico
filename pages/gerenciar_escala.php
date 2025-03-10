@@ -1,13 +1,13 @@
 <?php
-session_start();
+// Incluir o arquivo de verificação de sessão
+require_once('../backend/session.php');
+
+// Agora, a sessão está validada e o restante do código pode ser executado
 require_once('../includes/conexao.php');
 
-if (!isset($_SESSION['militar_id']) || $_SESSION['tipo'] != 'admin') {
-    header("Location: index.php");
-    exit();
-}
-
+// Verifica se o usuário está logado e se é um administrador
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // Lógica para inserir a escala no banco de dados
     $data_servico = $_POST['data_servico'];
     $tipo_escala = $_POST['tipo_escala'];
     $id_responsavel = $_POST['id_responsavel'];
@@ -33,10 +33,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     exit();
 }
 
-
 // Busca os militares no banco
 $militares = $conn->query("SELECT id, nome FROM militares");
 ?>
+
 
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -72,7 +72,6 @@ $militares = $conn->query("SELECT id, nome FROM militares");
                     <option value="Responsável pelos Banheiros">Responsável pelos Banheiros</option>
                 </select>
 
-                </select>
                 <label>Militar:</label>
                 <select name="servicos[0][id_militar]" required>
                     <?php
@@ -89,8 +88,6 @@ $militares = $conn->query("SELECT id, nome FROM militares");
         <button type="button" onclick="adicionarServico()">Adicionar Serviço</button><br><br>
         <button type="submit">Salvar Escala</button>
     </form>
-
-
 
     <script>
         let contadorServicos = 1;

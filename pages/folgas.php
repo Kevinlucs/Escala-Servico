@@ -1,12 +1,9 @@
 <?php
-session_start();
-require_once('../includes/conexao.php');
+// Incluir o arquivo de verificação de sessão
+require_once('../backend/session.php');
 
-// Verifica se o usuário está logado
-if (!isset($_SESSION['militar_id'])) {
-    header("Location: index.php");
-    exit();
-}
+// Agora, a sessão está validada e você pode prosseguir com o restante do código da página
+require_once('../includes/conexao.php');
 
 // Consulta para obter os dados da folga e o último serviço
 $query = "
