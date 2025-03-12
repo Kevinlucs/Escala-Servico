@@ -16,8 +16,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $identidade_militar = $_POST['identidade_militar'];
     $senha = $_POST['senha'];
 
-    // Consulta para verificar o usuário
-    $query = "SELECT id, identidade_militar, senha, tipo FROM usuarios WHERE identidade_militar = ?";
+    // Consulta para verificar o usuário na tabela usuarios
+    $query = "SELECT id, identidade_militar, senha, tipo, primeiro_acesso FROM usuarios WHERE identidade_militar = ?";
     $stmt = $conn->prepare($query);
     $stmt->bind_param("s", $identidade_militar);
     $stmt->execute();
@@ -30,9 +30,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['identidade_militar'] = $usuario['identidade_militar'];
         $_SESSION['tipo'] = $usuario['tipo']; // Define se é admin ou comum
 
-        // Redireciona para o dashboard
+        // Verifica se é o primeiro acesso
+        if ($usuario['primeiro_acesso'] == 1) {
+            // Se for o primeiro acesso, redireciona para a redefinição de senha
+            header("Location: redefinir_senha.php");
+            exit();
+        }
+
+        // Caso contrário, redireciona para o dashboard
         header("Location: dashboard.php");
-        exit(); // Certifique-se de que o redirecionamento ocorra corretamente
+        exit();
     } else {
         $erro = "Identidade ou senha incorreta.";
     }

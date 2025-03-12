@@ -1,19 +1,24 @@
 <?php
 // Incluir o arquivo de verificação de sessão
-require_once('../backend/session.php'); // Caminho ajustado para o arquivo session.php
-
+require_once('../backend/session.php');
 require_once('../includes/conexao.php');
 
-// Verifica se o formulário foi enviado
+// Verifica se o usuário está logado
+if (!isset($_SESSION['militar_id'])) {
+    header("Location: index.php");
+    exit();
+}
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Cria o hash da nova senha
     $nova_senha = password_hash($_POST['nova_senha'], PASSWORD_DEFAULT);
-    $id = $_SESSION['id'];
+    $id = $_SESSION['militar_id'];
 
-    // Atualiza a senha no banco de dados
+    // Atualiza a senha no banco de dados e marca que o primeiro acesso foi feito
     $sql = "UPDATE usuarios SET senha='$nova_senha', primeiro_acesso=0 WHERE id=$id";
     if ($conn->query($sql) === TRUE) {
-        header("Location: dashboard.php"); // Redireciona para o painel após sucesso
+        // Redireciona para o painel após sucesso
+        header("Location: dashboard.php");
         exit();
     } else {
         echo "Erro ao atualizar senha!";

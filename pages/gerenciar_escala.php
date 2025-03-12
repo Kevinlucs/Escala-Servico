@@ -1,8 +1,7 @@
 <?php
 // Incluir o arquivo de verificação de sessão
-require_once('../backend/session.php');
+require_once('../backend/session.php'); // Caminho ajustado para o arquivo session.php
 
-// Agora, a sessão está validada e o restante do código pode ser executado
 require_once('../includes/conexao.php');
 
 // Verifica se o usuário está logado e se é um administrador
@@ -20,11 +19,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // Insere os serviços
     foreach ($_POST['servicos'] as $servico) {
-        $tipo_servico = isset($servico['tipo_servico']) && !empty($servico['tipo_servico']) ? $servico['tipo_servico'] : 'Permanência';
+        // Verifica o id_tipo_servico com base no tipo_servico
+        $tipo_servico = $servico['tipo_servico'];
+
+        // Busca o id_tipo_servico na tabela Tipo_servicos
+        $stmt_tipo_servico = $conn->prepare("SELECT id FROM Tipo_servicos WHERE nome = ?");
+        $stmt_tipo_servico->bind_param("s", $tipo_servico);
+        $stmt_tipo_servico->execute();
+        $result_tipo_servico = $stmt_tipo_servico->get_result();
+        $tipo_servico_id = $result_tipo_servico->fetch_assoc()['id'];
+
         $id_militar = $servico['id_militar'];
 
-        $stmt = $conn->prepare("INSERT INTO servicos (id_escala, tipo_servico, id_militar) VALUES (?, ?, ?)");
-        $stmt->bind_param("isi", $id_escala, $tipo_servico, $id_militar);
+        // Insere os dados na tabela servicos usando o id_tipo_servico
+        $stmt = $conn->prepare("INSERT INTO servicos (id_escala, id_tipo_servico, id_militar) VALUES (?, ?, ?)");
+        $stmt->bind_param("iii", $id_escala, $tipo_servico_id, $id_militar);
         $stmt->execute();
     }
 
@@ -35,8 +44,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 // Busca os militares no banco
 $militares = $conn->query("SELECT id, nome FROM militares");
-?>
 
+// Busca os tipos de serviço disponíveis
+$tipos_servicos = $conn->query("SELECT id, nome FROM Tipo_servicos");
+?>
 
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -64,12 +75,13 @@ $militares = $conn->query("SELECT id, nome FROM militares");
         <div id="servicos">
             <div class="servico">
                 <label>Tipo de Serviço:</label>
-                <select name="tipo_servico" required>
-                    <option value="Permanência">Permanência</option>
-                    <option value="Aux Permanência">Aux Permanência</option>
-                    <option value="CB Garagem DGP">Cb Garagem DGP</option>
-                    <option value="SD Garagem DGP">Sd Garagem DGP</option>
-                    <option value="Responsável pelos Banheiros">Responsável pelos Banheiros</option>
+                <select name="servicos[0][tipo_servico]" required>
+                    <?php
+                    // Exibe os tipos de serviço disponíveis
+                    while ($tipo_servico = $tipos_servicos->fetch_assoc()) {
+                        echo "<option value='" . $tipo_servico['nome'] . "'>" . $tipo_servico['nome'] . "</option>";
+                    }
+                    ?>
                 </select>
 
                 <label>Militar:</label>
@@ -96,18 +108,22 @@ $militares = $conn->query("SELECT id, nome FROM militares");
             const div = document.createElement('div');
             div.className = 'servico';
             div.innerHTML = `
+
                 <label>Tipo de Serviço:</label>
                 <select name="servicos[${contadorServicos}][tipo_servico]" required>
-                    <option value="Permanência">Permanência</option>
-                    <option value="Aux Permanência">Aux Permanência</option>
-                    <option value="Garagem DGP">Garagem DGP</option>
-                    <option value="Missão">Missão</option>
-                    <option value="Responsável pelos banheiros">Responsável pelos banheiros</option>
+                    <?php
+                    // Exibe os tipos de serviço disponíveis novamente
+                    $tipos_servicos->data_seek(0); // Reinicia o ponteiro para que os tipos sejam novamente exibidos
+                    while ($tipo_servico = $tipos_servicos->fetch_assoc()) {
+                        echo "<option value='" . $tipo_servico['nome'] . "'>" . $tipo_servico['nome'] . "</option>";
+                    }
+                    ?>
                 </select>
                 <label>Militar:</label>
                 <select name="servicos[${contadorServicos}][id_militar]" required>
                     <?php
-                    $militares->data_seek(0);
+                    // Excluindo o responsável da lista de militares
+                    $militares->data_seek(0); // Reinicia o ponteiro
                     while ($militar = $militares->fetch_assoc()) { ?>
                         <option value="<?php echo $militar['id']; ?>"><?php echo $militar['nome']; ?></option>
                     <?php } ?>

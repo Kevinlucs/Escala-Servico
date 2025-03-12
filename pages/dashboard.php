@@ -26,6 +26,10 @@ require_once('../backend/session.php');
                 <li><a href="gerar_pdf.php">Gerar PDF</a></li>
             <?php } ?>
 
+            <?php if ($_SESSION['tipo'] == 'admin') { ?>
+                <li><a href="cadastrar_militar.php">Cadastrar</a></li>
+            <?php } ?>
+
             <li>
                 <?php if ($_SESSION['tipo'] == 'admin') { ?>
                     <a href="admin_dashboard.php">Folgas</a>
