@@ -1,7 +1,6 @@
 <?php
 // Incluir o arquivo de verificação de sessão
 require_once('../backend/session.php'); // Caminho ajustado para o arquivo session.php
-
 require_once('../includes/conexao.php');
 
 // Configura o locale para português
@@ -13,13 +12,14 @@ function removerAcentos($texto)
     return iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $texto);
 }
 
-// Busca as escalas
+// Busca as escalas, agora com o JOIN na tabela Tipo_servicos
 $escalas = $conn->query("
-    SELECT esc.id, esc.data_servico, esc.tipo_escala, s.tipo_servico, m.nome AS militar
+    SELECT esc.id, esc.data_servico, esc.tipo_escala, ts.nome AS tipo_servico, m.nome AS militar
     FROM escalas esc
     JOIN servicos s ON esc.id = s.id_escala
     JOIN militares m ON s.id_militar = m.id
-    ORDER BY esc.data_servico, s.tipo_servico
+    JOIN Tipo_servicos ts ON s.id_tipo_servico = ts.id
+    ORDER BY esc.data_servico, ts.nome
 ");
 
 if (!$escalas) {

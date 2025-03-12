@@ -65,7 +65,7 @@ if (isset($_POST['escala_id']) && is_array($_POST['escala_id'])) {
     // Criando PDF
     $pdf = new TCPDF();
     $pdf->SetCreator(PDF_CREATOR);
-    $pdf->SetTitle("Escala de Trabalho");
+    $pdf->SetTitle("Escala de Serviço");
     $pdf->setPrintHeader(false);
     $pdf->setHeaderFont(array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
     $pdf->setFooterFont(array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
@@ -105,9 +105,11 @@ if (isset($_POST['escala_id']) && is_array($_POST['escala_id'])) {
         $dataFormatada = str_replace(array_keys($meses), array_values($meses), $dataFormatada);
         $dataFormatada = str_replace(array_keys($diasSemana), array_values($diasSemana), $dataFormatada);
 
-        // Consulta os serviços associados a essa escala, incluindo os nomes dos militares
-        $query_servicos = "SELECT s.tipo_servico, m.nome FROM servicos s 
+        // Consulta os serviços associados a essa escala, agora usando o id_tipo_servico
+        $query_servicos = "SELECT ts.nome AS tipo_servico, m.nome 
+                            FROM servicos s 
                             JOIN militares m ON s.id_militar = m.id 
+                            JOIN Tipo_servicos ts ON s.id_tipo_servico = ts.id
                             WHERE s.id_escala = ?";
         $stmt = $conn->prepare($query_servicos);
         $stmt->bind_param("i", $escala['id']);
