@@ -74,8 +74,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <label>Posto Graduação:</label>
         <select name="posto_graducao" required>
             <option value="ST">ST</option>
-            <option value="CB">CB</option>
-            <option value="SD">SD</option>
+            <option value="ST">1º Sgt</option>
+            <option value="ST">2º Sgt</option>
+            <option value="ST">3º Sgt</option>
+            <option value="CB">Cb</option>
+            <option value="SD">Sd</option>
         </select><br><br>
 
         <label>Nome:</label>
