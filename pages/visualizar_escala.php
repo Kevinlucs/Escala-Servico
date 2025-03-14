@@ -12,9 +12,9 @@ function removerAcentos($texto)
     return iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $texto);
 }
 
-// Busca as escalas, agora com o JOIN na tabela Tipo_servicos
+// Busca as escalas, agora com o JOIN na tabela Tipo_servicos e a coluna posto_graduacao
 $escalas = $conn->query("
-    SELECT esc.id, esc.data_servico, esc.tipo_escala, ts.nome AS tipo_servico, m.nome AS militar
+    SELECT esc.id, esc.data_servico, esc.tipo_escala, ts.nome AS tipo_servico, m.nome AS militar, m.posto_graduacao
     FROM escalas esc
     JOIN servicos s ON esc.id = s.id_escala
     JOIN militares m ON s.id_militar = m.id
@@ -31,7 +31,7 @@ $escalas_organizadas = [];
 while ($escala = $escalas->fetch_assoc()) {
     $data_servico = $escala['data_servico'];
     $tipo_servico = $escala['tipo_servico'];
-    $militar = $escala['militar'];
+    $militar = $escala['posto_graduacao'] . " " . $escala['militar']; // Concatenando posto e nome do militar
 
     if (!isset($escalas_organizadas[$data_servico])) {
         $escalas_organizadas[$data_servico] = [];
@@ -43,6 +43,7 @@ while ($escala = $escalas->fetch_assoc()) {
 
     $escalas_organizadas[$data_servico][$tipo_servico][] = $militar;
 }
+
 ?>
 
 <!DOCTYPE html>
