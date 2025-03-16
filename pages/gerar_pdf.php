@@ -1,5 +1,5 @@
 <?php
-require_once('../tcpdf/tcpdf.php'); // Certifique-se de que a biblioteca está instalada
+require_once('../tcpdf/tcpdf.php');
 require_once('../includes/conexao.php');
 
 // Se o formulário não foi submetido, exibe a seleção de escalas
@@ -106,11 +106,11 @@ if (isset($_POST['escala_id']) && is_array($_POST['escala_id'])) {
         $dataFormatada = str_replace(array_keys($diasSemana), array_values($diasSemana), $dataFormatada);
 
         // Consulta os serviços associados a essa escala, agora usando o id_tipo_servico
-        $query_servicos = "SELECT ts.nome AS tipo_servico, m.nome 
-                            FROM servicos s 
-                            JOIN militares m ON s.id_militar = m.id 
-                            JOIN Tipo_servicos ts ON s.id_tipo_servico = ts.id
-                            WHERE s.id_escala = ?";
+        $query_servicos = "SELECT ts.nome AS tipo_servico, CONCAT(m.posto_graduacao, ' ', m.nome) AS nome_completo
+                    FROM servicos s 
+                    JOIN militares m ON s.id_militar = m.id 
+                    JOIN Tipo_servicos ts ON s.id_tipo_servico = ts.id
+                    WHERE s.id_escala = ?";
         $stmt = $conn->prepare($query_servicos);
         $stmt->bind_param("i", $escala['id']);
         $stmt->execute();
@@ -118,7 +118,7 @@ if (isset($_POST['escala_id']) && is_array($_POST['escala_id'])) {
 
         $servicos = [];
         while ($row = $result_servicos->fetch_assoc()) {
-            $servicos[$row['tipo_servico']][] = $row['nome'];
+            $servicos[$row['tipo_servico']][] = $row['nome_completo'];
         }
 
         // Adicionando título e dados de cada escala na mesma página
