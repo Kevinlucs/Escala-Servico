@@ -74,15 +74,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <label>Posto Graduação:</label>
         <select name="posto_graducao" required>
             <option value="ST">ST</option>
-            <option value="ST">1º Sgt</option>
-            <option value="ST">2º Sgt</option>
-            <option value="ST">3º Sgt</option>
+            <option value="1º Sgt">1º Sgt</option>
+            <option value="2º Sgt">2º Sgt</option>
+            <option value="3º Sgt">3º Sgt</option>
             <option value="CB">Cb</option>
             <option value="SD">Sd</option>
         </select><br><br>
 
         <label>Nome:</label>
-        <input type="text" name="nome" placeholder="Somente o nome de guerra" required><br><br>
+        <input type="text" name="nome" id="nome" placeholder="Somente o nome de guerra" required><br><br>
+
+        <script>
+            // Seleciona o campo de nome
+            const nomeField = document.getElementById('nome');
+
+            // Adiciona um evento para capturar o input e transformar em maiúsculas
+            nomeField.addEventListener('input', function() {
+                this.value = this.value.toUpperCase();
+            });
+        </script>
 
         <label>Serviços:</label><br>
         <select name="servicos[]" multiple required>
