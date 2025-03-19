@@ -22,11 +22,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $erro = "Erro ao cadastrar escala."; // Caso haja algum erro
     }
 
-    // Insere os serviços
+    // Insere os serviços para os militares
     if (isset($id_escala)) {
+        // Verificando e inserindo cada serviço
         foreach ($_POST['servicos'] as $servico) {
-            // Verifica o id_tipo_servico com base no tipo_servico
+            // Obtendo os dados necessários do serviço
             $tipo_servico = $servico['tipo_servico'];
+            $id_militar = $servico['id_militar'];
 
             // Busca o id_tipo_servico na tabela Tipo_servicos
             $stmt_tipo_servico = $conn->prepare("SELECT id FROM Tipo_servicos WHERE nome = ?");
@@ -35,12 +37,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $result_tipo_servico = $stmt_tipo_servico->get_result();
             $tipo_servico_id = $result_tipo_servico->fetch_assoc()['id'];
 
-            $id_militar = $servico['id_militar'];
-
-            // Insere os dados na tabela servicos usando o id_tipo_servico
-            $stmt = $conn->prepare("INSERT INTO servicos (id_escala, id_tipo_servico, id_militar) VALUES (?, ?, ?)");
-            $stmt->bind_param("iii", $id_escala, $tipo_servico_id, $id_militar);
-            $stmt->execute();
+            // Insere os dados na tabela servicos
+            $stmt_servicos = $conn->prepare("INSERT INTO servicos (id_escala, id_tipo_servico, id_militar) VALUES (?, ?, ?)");
+            $stmt_servicos->bind_param("iii", $id_escala, $tipo_servico_id, $id_militar);
+            $stmt_servicos->execute();
         }
     }
 
@@ -55,26 +55,36 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 // Verifica se um tipo de serviço foi selecionado para filtrar os militares
 $militares = [];
-if (isset($_POST['tipo_servico'])) {
+if (isset($_POST['tipo_servico']) && $_POST['tipo_servico'] != '') {
     $tipo_servico = $_POST['tipo_servico'];
 
-    // Busca os militares que estão associados ao tipo de serviço selecionado
+    // Busca os militares que estão associados ao tipo de serviço selecionado e não são admins
     $stmt = $conn->prepare("
         SELECT m.id, m.nome, m.posto_graduacao 
         FROM militares m
         JOIN servicos s ON m.id = s.id_militar 
         JOIN tipo_servicos ts ON ts.id = s.id_tipo_servico 
-        WHERE ts.nome = ?
+        JOIN usuarios u ON u.identidade_militar = m.identidade_militar
+        WHERE ts.nome = ? AND u.tipo != 'admin'
     ");
     $stmt->bind_param("s", $tipo_servico); // Usando o tipo de serviço selecionado
     $stmt->execute();
     $result = $stmt->get_result();
     $militares = $result->fetch_all(MYSQLI_ASSOC);
 } else {
-    // Caso não tenha sido selecionado um tipo de serviço, traz todos os militares
-    $militares = $conn->query("SELECT id, nome, posto_graduacao FROM militares")->fetch_all(MYSQLI_ASSOC);
+    // Caso não tenha sido selecionado um tipo de serviço, traz todos os militares (exceto admins)
+    $stmt = $conn->prepare("
+        SELECT m.id, m.nome, m.posto_graduacao 
+        FROM militares m
+        JOIN usuarios u ON u.identidade_militar = m.identidade_militar
+        WHERE u.tipo != 'admin'
+    ");
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $militares = $result->fetch_all(MYSQLI_ASSOC);
 }
 
+// Busca os tipos de serviço disponíveis
 $tipos_servicos = $conn->query("SELECT id, nome FROM Tipo_servicos");
 
 ?>
@@ -85,6 +95,7 @@ $tipos_servicos = $conn->query("SELECT id, nome FROM Tipo_servicos");
 <head>
     <meta charset="UTF-8">
     <title>Gerenciar Escala</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </head>
 
 <body>
@@ -99,13 +110,12 @@ $tipos_servicos = $conn->query("SELECT id, nome FROM Tipo_servicos");
             <option value="Vermelha" <?php echo isset($tipo_escala) && $tipo_escala == 'Vermelha' ? 'selected' : ''; ?>>Vermelha</option>
         </select><br><br>
 
-        <!-- O responsável será o administrador logado -->
         <input type="hidden" name="id_responsavel" value="<?php echo $_SESSION['militar_id']; ?>">
 
         <div id="servicos">
             <div class="servico">
                 <label>Tipo de Serviço:</label>
-                <select name="tipo_servico" required>
+                <select name="tipo_servico" id="tipo_servico" required>
                     <?php
                     // Exibe os tipos de serviço disponíveis
                     while ($tipo_servico = $tipos_servicos->fetch_assoc()) {
@@ -115,21 +125,45 @@ $tipos_servicos = $conn->query("SELECT id, nome FROM Tipo_servicos");
                 </select>
 
                 <label>Militar:</label>
-                <select name="servicos[0][id_militar]" required>
-                    <?php
-                    // Exibindo todos os militares
-                    foreach ($militares as $militar) {
-                        echo "<option value='" . $militar['id'] . "'>" . $militar['posto_graduacao'] . " " . $militar['nome'] . "</option>";
-                    }
-                    ?>
+                <select name="servicos[0][id_militar]" id="militar_select" required>
+                    <!-- Inicialmente, será preenchido via AJAX -->
                 </select>
             </div>
         </div>
+
         <button type="button" onclick="adicionarServico()">Adicionar Serviço</button><br><br>
         <button type="submit">Salvar Escala</button>
     </form>
 
     <script>
+        // Função AJAX para carregar os militares com base no serviço selecionado
+        $("#tipo_servico").change(function() {
+            var tipo_servico = $(this).val(); // Pega o valor do tipo de serviço selecionado
+
+            // Realiza a requisição AJAX para o arquivo consultar_militares.php
+            $.ajax({
+                url: "consultar_militares.php", // Caminho para o arquivo PHP
+                type: "GET",
+                data: {
+                    tipo_servico: tipo_servico
+                }, // Envia o tipo de serviço
+                dataType: "json", // Espera receber os dados em formato JSON
+                success: function(data) {
+                    // Preenche o campo de seleção de militares com os dados retornados
+                    var options = "<option value=''>Selecione um militar</option>"; // Primeira opção
+                    $.each(data, function(index, militar) {
+                        options += "<option value='" + militar.id + "'>" + militar.posto_graduacao + " " + militar.nome + "</option>";
+                    });
+                    $("#militar_select").html(options); // Atualiza as opções no select de militares
+                }
+            });
+        });
+
+        // Ao carregar a página, se já houver valor selecionado, dispara a mudança para carregar os militares
+        $(document).ready(function() {
+            $("#tipo_servico").trigger("change");
+        });
+
         let contadorServicos = 1;
 
         function adicionarServico() {
@@ -148,12 +182,7 @@ $tipos_servicos = $conn->query("SELECT id, nome FROM Tipo_servicos");
                 </select>
                 <label>Militar:</label>
                 <select name="servicos[${contadorServicos}][id_militar]" required>
-                    <?php
-                    // Exibindo todos os militares
-                    foreach ($militares as $militar) {
-                        echo "<option value='" . $militar['id'] . "'>" . $militar['posto_graduacao'] . " " . $militar['nome'] . "</option>";
-                    }
-                    ?>
+                    <!-- Os militares serão carregados via AJAX aqui também -->
                 </select>
             `;
             document.getElementById('servicos').appendChild(div);

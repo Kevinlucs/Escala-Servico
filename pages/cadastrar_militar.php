@@ -13,25 +13,31 @@ if ($_SESSION['tipo'] != 'admin') {
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Coleta os dados do formulário
     $identidade_militar = $_POST['identidade_militar'];
-    $posto_graducao = $_POST['posto_graducao'];
+    $posto_graduacao = $_POST['posto_graduacao'];
     $nome = $_POST['nome'];
     $servicos = $_POST['servicos']; // Array de IDs de serviços
     $secao = $_POST['secao'];
     $funcao = $_POST['funcao'];
 
-    // Verificar se a identidade militar já existe
-    $stmt_check = $conn->prepare("SELECT * FROM militares WHERE identidade_militar = ?");
-    $stmt_check->bind_param("s", $identidade_militar);
-    $stmt_check->execute();
-    $result_check = $stmt_check->get_result();
+    // Verificar se a identidade militar já existe na tabela militares
+    $stmt_check_militar = $conn->prepare("SELECT * FROM militares WHERE identidade_militar = ?");
+    $stmt_check_militar->bind_param("s", $identidade_militar);
+    $stmt_check_militar->execute();
+    $result_check_militar = $stmt_check_militar->get_result();
 
-    if ($result_check->num_rows > 0) {
+    // Verificar se a identidade militar já existe na tabela usuarios
+    $stmt_check_usuario = $conn->prepare("SELECT * FROM usuarios WHERE identidade_militar = ?");
+    $stmt_check_usuario->bind_param("s", $identidade_militar);
+    $stmt_check_usuario->execute();
+    $result_check_usuario = $stmt_check_usuario->get_result();
+
+    if ($result_check_militar->num_rows > 0 || $result_check_usuario->num_rows > 0) {
         // Se a identidade já existe, exibe uma mensagem de erro
         echo "Erro: Identidade Militar já cadastrada.";
     } else {
         // Insere o militar na tabela militares
-        $stmt_militar = $conn->prepare("INSERT INTO militares (identidade_militar, posto_graducao, nome, secao) VALUES (?, ?, ?, ?)");
-        $stmt_militar->bind_param("ssss", $identidade_militar, $posto_graducao, $nome, $secao);
+        $stmt_militar = $conn->prepare("INSERT INTO militares (identidade_militar, posto_graduacao, nome, secao) VALUES (?, ?, ?, ?)");
+        $stmt_militar->bind_param("ssss", $identidade_militar, $posto_graduacao, $nome, $secao);
         $stmt_militar->execute();
         $militar_id = $stmt_militar->insert_id;
 
@@ -72,7 +78,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <input type="text" name="identidade_militar" maxlength="10" required><br><br>
 
         <label>Posto Graduação:</label>
-        <select name="posto_graducao" required>
+        <select name="posto_graduacao" required>
             <option value="ST">ST</option>
             <option value="1º Sgt">1º Sgt</option>
             <option value="2º Sgt">2º Sgt</option>
