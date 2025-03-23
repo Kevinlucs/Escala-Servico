@@ -1,7 +1,7 @@
 <?php
-// Incluir o arquivo de verificação de sessão
-require_once('../backend/session.php'); // Caminho para o arquivo session.php
-require_once('../includes/conexao.php'); // Para realizar a conexão com o banco de dados
+
+require_once('../backend/session.php');
+require_once('../includes/conexao.php');
 
 // Verifica se o administrador está acessando a página
 if ($_SESSION['tipo'] != 'admin') {
@@ -11,11 +11,11 @@ if ($_SESSION['tipo'] != 'admin') {
 
 // Verifica se o formulário foi enviado
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Coleta os dados do formulário
+
     $identidade_militar = $_POST['identidade_militar'];
     $posto_graduacao = $_POST['posto_graduacao'];
     $nome = $_POST['nome'];
-    $servicos = $_POST['servicos']; // Array de IDs de serviços
+    $servicos = $_POST['servicos'];
     $secao = $_POST['secao'];
     $funcao = $_POST['funcao'];
 
@@ -42,8 +42,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $militar_id = $stmt_militar->insert_id;
 
         // Insere o militar na tabela usuarios com a senha inicial como a identidade
-        $senha_inicial = password_hash($identidade_militar, PASSWORD_DEFAULT); // Hashea a senha
-        $primeiro_acesso = 1; // Marca como primeiro acesso
+        $senha_inicial = password_hash($identidade_militar, PASSWORD_DEFAULT);
+        $primeiro_acesso = 1;
 
         // Insere o militar na tabela usuarios
         $stmt_usuario = $conn->prepare("INSERT INTO usuarios (identidade_militar, senha, tipo, primeiro_acesso) VALUES (?, ?, ?, ?)");
@@ -91,10 +91,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <input type="text" name="nome" id="nome" placeholder="Somente o nome de guerra" required><br><br>
 
         <script>
-            // Seleciona o campo de nome
             const nomeField = document.getElementById('nome');
 
-            // Adiciona um evento para capturar o input e transformar em maiúsculas
+
             nomeField.addEventListener('input', function() {
                 this.value = this.value.toUpperCase();
             });

@@ -1,13 +1,14 @@
 <?php
+// Incluir a conexão com o banco de dados
 require_once('../includes/conexao.php');
 
-// Recebe o tipo de serviço via GET (AJAX)
+// Verifica se o tipo de serviço foi enviado
 if (isset($_GET['tipo_servico'])) {
     $tipo_servico = $_GET['tipo_servico'];
 
-    // Busca os militares que podem pegar o serviço selecionado e não são admins
+    // Busca os militares associados ao tipo de serviço e exclui os administradores
     $stmt = $conn->prepare("
-        SELECT m.id, m.nome, m.posto_graduacao 
+        SELECT m.id, m.nome, m.posto_graduacao
         FROM militares m
         JOIN servicos s ON m.id = s.id_militar
         JOIN tipo_servicos ts ON ts.id = s.id_tipo_servico
@@ -18,12 +19,12 @@ if (isset($_GET['tipo_servico'])) {
     $stmt->execute();
     $result = $stmt->get_result();
 
-    // Prepara a resposta com os militares
+    // Cria um array para armazenar os militares
     $militares = [];
-    while ($militar = $result->fetch_assoc()) {
-        $militares[] = $militar;
+    while ($row = $result->fetch_assoc()) {
+        $militares[] = $row;
     }
 
-    // Retorna os militares em formato JSON
+    // Retorna os militares como JSON
     echo json_encode($militares);
 }
