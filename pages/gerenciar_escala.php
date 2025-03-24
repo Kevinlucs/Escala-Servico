@@ -1,8 +1,6 @@
 <?php
-// Incluir o arquivo de verificação de sessão
-require_once('../backend/session.php'); // Caminho ajustado para o arquivo session.php
 
-// Incluir a conexão com o banco de dados
+require_once('../backend/session.php');
 require_once('../includes/conexao.php');
 
 // Verifica se o formulário foi enviado
@@ -16,10 +14,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt = $conn->prepare("INSERT INTO escalas (data_servico, tipo_escala, id_responsavel) VALUES (?, ?, ?)");
     $stmt->bind_param("ssi", $data_servico, $tipo_escala, $id_responsavel);
     if ($stmt->execute()) {
-        $id_escala = $stmt->insert_id; // Obtemos o id da escala inserida
-        $sucesso = "Escala cadastrada com sucesso!"; // Mensagem de sucesso
+        $id_escala = $stmt->insert_id;
+        $sucesso = "Escala cadastrada com sucesso!";
     } else {
-        $erro = "Erro ao cadastrar escala."; // Caso haja algum erro
+        $erro = "Erro ao cadastrar escala.";
     }
 
     // Insere os serviços para os militares
@@ -48,12 +46,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
 
-    // Exibir mensagem de sucesso
     if (isset($sucesso)) {
         echo "<script>alert('$sucesso');</script>";
     }
 
-    header("Location: gerenciar_escala.php"); // Redireciona após o salvamento
+    header("Location: gerenciar_escala.php");
     exit();
 }
 

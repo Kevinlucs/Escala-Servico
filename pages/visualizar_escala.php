@@ -1,9 +1,9 @@
 <?php
-// Incluir o arquivo de verificação de sessão
-require_once('../backend/session.php'); // Caminho ajustado para o arquivo session.php
+
+require_once('../backend/session.php');
 require_once('../includes/conexao.php');
 
-// Configura o locale para português
+
 setlocale(LC_TIME, 'pt_BR.utf8', 'pt_BR', 'Portuguese_Brazil');
 
 // Função para remover acentos
@@ -134,11 +134,11 @@ while ($escala = $escalas->fetch_assoc()) {
                 'Dec' => 'DEZ'
             ];
 
-            $data_servico_formatada = date('d M y', strtotime($data_servico)); // Data formatada
-            $mes_ingles = date('M', strtotime($data_servico)); // Pega o mês em inglês
+            $data_servico_formatada = date('d M y', strtotime($data_servico));
+            $mes_ingles = date('M', strtotime($data_servico));
             $mes_portugues = $traducao_meses[$mes_ingles] ?? $mes_ingles; // Traduz o mês
 
-            $dia_semana = date('l', strtotime($data_servico)); // Pega o nome do dia
+            $dia_semana = date('l', strtotime($data_servico));
             $dia_semana_traduzido = $traducao_dias[$dia_semana] ?? ''; // Traduz para português
 
             // Substitui o mês no formato final

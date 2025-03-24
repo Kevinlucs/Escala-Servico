@@ -1,5 +1,5 @@
 <?php
-// Incluir o arquivo de verificação de sessão
+
 require_once('../backend/session.php');
 require_once('../includes/conexao.php');
 
