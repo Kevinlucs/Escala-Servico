@@ -1,12 +1,10 @@
 <?php
-// Incluir o arquivo de verificação de sessão
-require_once('../backend/session.php'); // Caminho ajustado para o arquivo session.php
 
+require_once('../backend/session.php');
 require_once('../includes/conexao.php');
 
 // Verifica se o usuário já está logado
 if (isset($_SESSION['militar_id'])) {
-    // Se estiver logado, redireciona diretamente para o dashboard
     header("Location: dashboard.php");
     exit();
 }

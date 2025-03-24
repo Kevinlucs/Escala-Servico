@@ -1,8 +1,6 @@
 <?php
-// Incluir o arquivo de verificação de sessão
-require_once('../backend/session.php');
 
-// Agora, a sessão está validada e você pode prosseguir com o restante do código da página
+require_once('../backend/session.php');
 require_once('../includes/conexao.php');
 
 // Consulta para obter os dados da folga e o último serviço

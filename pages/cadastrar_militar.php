@@ -3,7 +3,7 @@
 require_once('../backend/session.php');
 require_once('../includes/conexao.php');
 
-// Verifica se o administrador está acessando a página
+
 if ($_SESSION['tipo'] != 'admin') {
     header("Location: index.php");
     exit();

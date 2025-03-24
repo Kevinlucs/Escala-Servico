@@ -62,7 +62,6 @@ if (isset($_POST['escala_id']) && is_array($_POST['escala_id'])) {
         die("Nenhuma escala encontrada!");
     }
 
-    // Criando PDF
     $pdf = new TCPDF();
     $pdf->SetCreator(PDF_CREATOR);
     $pdf->SetTitle("Escala de Serviço");
@@ -76,10 +75,8 @@ if (isset($_POST['escala_id']) && is_array($_POST['escala_id'])) {
     $html = '<h1 style="text-align: center;">SERVIÇO INTERNO</h1>';
 
     foreach ($escalas as $escala) {
-        // Configura o locale corretamente
         setlocale(LC_TIME, 'pt_BR.UTF-8', 'pt_BR', 'Portuguese_Brazil', 'ptb');
 
-        // Obtém e formata a data corretamente
         $dataObj = new DateTime($escala['data_servico']);
         $dataFormatada = $dataObj->format('d M y (D)');
 
@@ -105,7 +102,6 @@ if (isset($_POST['escala_id']) && is_array($_POST['escala_id'])) {
         $dataFormatada = str_replace(array_keys($meses), array_values($meses), $dataFormatada);
         $dataFormatada = str_replace(array_keys($diasSemana), array_values($diasSemana), $dataFormatada);
 
-        // Consulta os serviços associados a essa escala, agora usando o id_tipo_servico
         $query_servicos = "SELECT ts.nome AS tipo_servico, CONCAT(m.posto_graduacao, ' ', m.nome) AS nome_completo
                     FROM servicos s 
                     JOIN militares m ON s.id_militar = m.id 
@@ -134,7 +130,7 @@ if (isset($_POST['escala_id']) && is_array($_POST['escala_id'])) {
     $pdf->writeHTML($html, true, false, true, false, '');
 
     // Exibir o PDF na tela antes de baixar
-    $pdf->Output('escala.pdf', 'I'); // 'I' para visualizar no navegador
+    $pdf->Output('escala.pdf', 'I');
     exit();
 } else {
     echo "Nenhuma escala selecionada.";

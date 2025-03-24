@@ -1,5 +1,5 @@
 <?php
-// Incluir a conexão com o banco de dados
+
 require_once('../includes/conexao.php');
 
 // Verifica se o tipo de serviço foi enviado
@@ -19,12 +19,10 @@ if (isset($_GET['tipo_servico'])) {
     $stmt->execute();
     $result = $stmt->get_result();
 
-    // Cria um array para armazenar os militares
     $militares = [];
     while ($row = $result->fetch_assoc()) {
         $militares[] = $row;
     }
 
-    // Retorna os militares como JSON
     echo json_encode($militares);
 }

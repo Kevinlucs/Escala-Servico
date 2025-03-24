@@ -12,7 +12,7 @@ if (!isset($_SESSION['militar_id']) || $_SESSION['tipo'] != 'admin') {
 // Função para calcular as folgas (preta ou vermelha)
 function calcularFolgas($data_servico, $tipo_escala)
 {
-    $hoje = date('Y-m-d'); // Data atual
+    $hoje = date('Y-m-d');
 
     if ($data_servico) {
         $data_servico = strtotime($data_servico);
