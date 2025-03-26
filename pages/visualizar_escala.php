@@ -19,7 +19,7 @@ $escalas = $conn->query("
     JOIN servicos s ON esc.id = s.id_escala
     JOIN militares m ON s.id_militar = m.id
     JOIN Tipo_servicos ts ON s.id_tipo_servico = ts.id
-    ORDER BY esc.data_servico, ts.nome
+    ORDER BY esc.data_servico, s.id
 ");
 
 if (!$escalas) {
@@ -41,6 +41,7 @@ while ($escala = $escalas->fetch_assoc()) {
         $escalas_organizadas[$data_servico][$tipo_servico] = [];
     }
 
+    // Adicionando os militares ao tipo de serviço correspondente
     $escalas_organizadas[$data_servico][$tipo_servico][] = $militar;
 }
 
@@ -165,6 +166,7 @@ while ($escala = $escalas->fetch_assoc()) {
             <?php } ?>
         </table>
     <?php } ?>
+
     <div class="signature">
     </div>
 </body>
