@@ -14,37 +14,38 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt = $conn->prepare("INSERT INTO escalas (data_servico, tipo_escala, id_responsavel) VALUES (?, ?, ?)");
     $stmt->bind_param("ssi", $data_servico, $tipo_escala, $id_responsavel);
     if ($stmt->execute()) {
-        $id_escala = $stmt->insert_id;
+        $id_escala = $stmt->insert_id; // Obtém o id da escala inserida
         $sucesso = "Escala cadastrada com sucesso!";
     } else {
         $erro = "Erro ao cadastrar escala.";
     }
 
     // Insere os serviços para os militares
-    if (isset($id_escala)) {
+    if (isset($id_escala) && isset($_POST['servicos'])) {
         foreach ($_POST['servicos'] as $servico) {
-            // Verifique se o id_militar está sendo enviado corretamente
+            // Verifica se o id_militar está sendo enviado corretamente
             $tipo_servico = $servico['tipo_servico'];
             $id_militar = $servico['id_militar'];
 
-            // Verifique se $id_militar e $tipo_servico estão sendo recebidos corretamente
-            echo "Tipo de Serviço: " . $tipo_servico . "<br>";
-            echo "Id do Militar: " . $id_militar . "<br>";
-
-            // Busca o id_tipo_servico na tabela Tipo_servicos
+            // Verifica o id_tipo_servico com base no nome do tipo_servico
             $stmt_tipo_servico = $conn->prepare("SELECT id FROM Tipo_servicos WHERE nome = ?");
             $stmt_tipo_servico->bind_param("s", $tipo_servico);
             $stmt_tipo_servico->execute();
             $result_tipo_servico = $stmt_tipo_servico->get_result();
             $tipo_servico_id = $result_tipo_servico->fetch_assoc()['id'];
 
+            // Verificando se o id_tipo_servico foi encontrado corretamente
+            echo "ID do Tipo de Serviço: " . $tipo_servico_id . "<br>";
+            echo "ID do Militar: " . $id_militar . "<br>";
+
             // Insere os dados na tabela servicos
             $stmt_servicos = $conn->prepare("INSERT INTO servicos (id_escala, id_tipo_servico, id_militar) VALUES (?, ?, ?)");
             $stmt_servicos->bind_param("iii", $id_escala, $tipo_servico_id, $id_militar);
-            $stmt_servicos->execute();
+            if (!$stmt_servicos->execute()) {
+                echo "Erro ao inserir serviço no banco de dados: " . $stmt_servicos->error . "<br>";
+            }
         }
     }
-
 
     if (isset($sucesso)) {
         echo "<script>alert('$sucesso');</script>";
@@ -56,6 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 // Verifica os tipos de serviço disponíveis
 $tipos_servicos = $conn->query("SELECT id, nome FROM Tipo_servicos");
+
 ?>
 
 <!DOCTYPE html>
@@ -84,7 +86,7 @@ $tipos_servicos = $conn->query("SELECT id, nome FROM Tipo_servicos");
         <div id="servicos">
             <div class="servico">
                 <label>Tipo de Serviço:</label>
-                <select name="tipo_servico" class="tipo_servico" required>
+                <select name="servicos[0][tipo_servico]" class="tipo_servico" required>
                     <?php
                     // Exibe os tipos de serviço disponíveis
                     while ($tipo_servico = $tipos_servicos->fetch_assoc()) {
@@ -119,7 +121,7 @@ $tipos_servicos = $conn->query("SELECT id, nome FROM Tipo_servicos");
                 dataType: "json", // Espera receber os dados em formato JSON
                 success: function(data) {
                     // Preenche o campo de seleção de militares com os dados retornados
-                    var options = "<option value=''>Selecione um militar</option>"; // Primeira opção
+                    var options = "<option value=''>Selecione um militar</option>";
                     $.each(data, function(index, militar) {
                         options += "<option value='" + militar.id + "'>" + militar.posto_graduacao + " " + militar.nome + "</option>";
                     });
@@ -134,6 +136,7 @@ $tipos_servicos = $conn->query("SELECT id, nome FROM Tipo_servicos");
         });
 
         let contadorServicos = 1;
+        let militaresSelecionados = []; // Array para controlar os militares já selecionados
 
         function adicionarServico() {
             const div = document.createElement('div');
@@ -160,6 +163,36 @@ $tipos_servicos = $conn->query("SELECT id, nome FROM Tipo_servicos");
             // Dispara a requisição AJAX para preencher o campo de militares após adicionar um novo serviço
             $(".tipo_servico").last().trigger("change");
         }
+
+        $(document).on('change', '.tipo_servico', function() {
+            var tipo_servico = $(this).val(); // Pega o valor do tipo de serviço selecionado
+            var data_servico = $("input[name='data_servico']").val(); // Pega a data do serviço
+            var select_militar = $(this).closest('.servico').find('.militar_select'); // Encontra o campo de militares
+
+            // Realiza a requisição AJAX para o arquivo consultar_militares.php
+            $.ajax({
+                url: "consultar_militares.php", // Caminho para o arquivo PHP
+                type: "GET",
+                data: {
+                    tipo_servico: tipo_servico,
+                    data_servico: data_servico // Envia a data do serviço
+                },
+                dataType: "json", // Espera receber os dados em formato JSON
+                success: function(data) {
+                    // Preenche o campo de seleção de militares com os dados retornados
+                    var options = "<option value=''>Selecione um militar</option>";
+                    $.each(data, function(index, militar) {
+                        options += "<option value='" + militar.id + "'>" + militar.posto_graduacao + " " + militar.nome + "</option>";
+                    });
+                    select_militar.html(options); // Atualiza as opções no select de militares
+                }
+            });
+        });
+
+        // Ao carregar a página, se já houver valor selecionado, dispara a mudança para carregar os militares
+        $(document).ready(function() {
+            $(".tipo_servico").trigger("change");
+        });
     </script>
 </body>
 
